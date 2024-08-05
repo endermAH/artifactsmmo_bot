@@ -1,9 +1,8 @@
 import requests
 import time
 
+from Classes.log import Log
 from data import *
-from log import Log
-
 
 class Unit:
 

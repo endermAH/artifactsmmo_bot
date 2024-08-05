@@ -1,5 +1,7 @@
 import requests
 
+from data import *
+
 
 class Telegram:
 

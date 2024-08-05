@@ -1,91 +1,10 @@
 import requests
-import time
-import math
 
-from log import Log
-from unit import Unit
+from Classes.log import Log
+from Classes.maps import *
+from Classes.unit import Unit
+from Classes.telegram import Telegram
 from data import *
-from telegram import Telegram
-
-
-GREEN_SLIMES = (0, -1)
-YELLOW_SLIMES = (1, -2)
-
-
-class MapResource:
-
-    def __init__(self, name):
-        resource_url = f"{API_URL}/resources/{name}"
-        responce = requests.get(resource_url, headers=HEADERS)
-        Log.info(f"{responce.json()}")
-        self.name = name
-        self.drops = responce.json()['data']['drops']
-
-    
-    def __str__(self):
-        return f"{self.name}"
-
-
-    def can_drop(self, resource):
-        can_drop = False
-        for drop in self.drops:
-            if drop['code'] == resource:
-                can_drop = True
-        return can_drop
-
-
-class Map:
-
-    @staticmethod
-    def collect_map():
-        map = []
-        page = 1
-        map_url = f"{API_URL}/maps"
-        responce = requests.get(map_url, headers=HEADERS)
-        max_pages = responce.json()['pages']
-        map += responce.json()['data']
-        if max_pages > 1:
-            for page in range(2,max_pages+1):
-                responce = requests.get(map_url, headers=HEADERS, params={"page": page})
-                max_pages = responce.json()['pages']
-                map += responce.json()['data']
-        return map
-
-
-    @staticmethod
-    def find_resource(resource, unit):
-        """ Find nearest resource """
-        Log.info(f"{unit} searching for nearest {resource}")
-        world_map = Map.collect_map()
-        dist = 9999
-        coordinates = {}
-        # Log.info(f"{world_map}")
-        for tile in world_map:
-            if (tile['content'] != None and tile['content']['type'] == "resource"):
-                map_resource = MapResource(tile['content']['code'])
-                # Log.debug(f"Found {map_resource}")
-                if map_resource.can_drop(resource):
-                    if math.dist([tile["x"], tile['y']], [unit.x, unit.y]) < dist:
-                        coordinates = {"x": tile["x"], "y": tile['y']}
-        Log.info(f"{unit} found {resource} at {coordinates}")
-        return coordinates
-
-    
-    @staticmethod
-    def find_workshop(skill, unit):
-        """ Find nearest workshop """
-        Log.info(f"{unit} searching for nearest workshop:{skill}")
-        world_map = Map.collect_map()
-        dist = 9999
-        coordinates = {}
-        # Log.info(f"{world_map}")
-        for tile in world_map:
-            if (tile['content'] != None and tile['content']['type'] == "workshop" and tile['content']['code'] == skill):
-                if math.dist([tile["x"], tile['y']], [unit.x, unit.y]) < dist:
-                    coordinates = {"x": tile["x"], "y": tile['y']}
-        Log.info(f"{unit} found workshop:{skill} at {coordinates}")
-        return coordinates
-
 
 class Jobs:
 
@@ -162,26 +81,3 @@ class Jobs:
             for craft_item in item_info['craft']['items']:
                 item_res_array = Jobs.__get_required_resources(craft_item['code'], craft_item['quantity']*count, res_array)
             return res_array
-
-
-Log.info("Started")
-
-### Rimuru ###
-
-rimuru = Unit("rimuru")
-for i in range(20):
-    Jobs.craft_item_reqursively('copper_armor', 1, rimuru)
-
-###############
-
-### Rigurt ###
-
-# rigurt = Unit("Rigurt")
-# for i in range(10):
-#     Jobs.craft_item_reqursively('cooked_gudgeon', 10, rigurt)
-
-##############
-
-Log.info("Done")
-
-
