@@ -11,6 +11,12 @@ class MapResource:
         resource_url = f"{API_URL}/resources/{name}"
         responce = requests.get(resource_url, headers=HEADERS)
         Log.info(f"{responce.json()}")
+        if ("error" in responce.json() and responce.json()['error']['code'] == 404):
+            Log.info(f"Resource {name} not found, searching for monster")
+            resource_url = f"{API_URL}/monsters/{name}"
+            responce = requests.get(resource_url, headers=HEADERS)
+            # Log.info(f"{responce.json()}")
+
         self.name = name
         self.drops = responce.json()['data']['drops']
 
@@ -52,14 +58,16 @@ class Map:
         world_map = Map.collect_map()
         dist = 9999
         coordinates = {}
+
         # Log.info(f"{world_map}")
         for tile in world_map:
-            if (tile['content'] != None and tile['content']['type'] == "resource"):
-                map_resource = MapResource(tile['content']['code'])
-                # Log.debug(f"Found {map_resource}")
-                if map_resource.can_drop(resource):
-                    if math.dist([tile["x"], tile['y']], [unit.x, unit.y]) < dist:
-                        coordinates = {"x": tile["x"], "y": tile['y']}
+            if (tile['content'] != None):
+                if (tile['content']['type'] in ["resource", "monster"]):
+                    map_resource = MapResource(tile['content']['code'])
+                    # Log.debug(f"Found {map_resource}")
+                    if map_resource.can_drop(resource):
+                        if math.dist([tile["x"], tile['y']], [unit.x, unit.y]) < dist:
+                            coordinates = {"x": tile["x"], "y": tile['y'], "type": tile['content']['type']}
         Log.info(f"{unit} found {resource} at {coordinates}")
         return coordinates
 

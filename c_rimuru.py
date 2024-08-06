@@ -15,11 +15,15 @@ Log.info("Started")
 ### Banimaru ###
 
 rimuru = Unit("rimuru")
+Jobs.craft_item_reqursively('iron_armor', 1, rimuru)
+Jobs.craft_item_reqursively('iron_legs_armor', 1, rimuru)
+Jobs.craft_item_reqursively('iron_helm', 1, rimuru)
+Jobs.craft_item_reqursively('iron_boots', 1, rimuru)
 # Jobs.craft_item_reqursively('cooked_gudgeon', 1, banimaru)
-rimuru.move(*CHICKENS)
-for i in range(10):
-    Jobs.craft_item_reqursively('copper_armor', 1, rimuru)
-Telegram.notify(f"`{unit}` crafted *10* of *copper_armor*")
+# rimuru.move(*CHICKENS) 
+# for i in range(30):
+#     Jobs.craft_item_reqursively('copper_legs_armor', 1, rimuru)
+# Telegram.notify(f"`{rimuru}` crafted *30* of *copper_legs_armor*")
 ##############
 
 Log.info("Done")
